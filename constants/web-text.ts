@@ -1,0 +1,6 @@
+export const VEHICLE_INSPECTION = "Vehicle Inspection"
+export const APP_DESCRIPTION = "Have your vehicle inspection within minutes"
+export const OTP_UI_DISPLAY_MSG = "A 4 digit OTP will be sent via SMS to verify your mobile number!"
+export const OTP_UI_VERIFICATION_DISPLAY_MSG = "Enter the OTP you have recieved to "
+export const OTP_VERIFICATION = "OTP Verification"
+export const RESEND_OTP = "RESEND OTP"
