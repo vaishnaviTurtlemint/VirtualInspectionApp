@@ -91,7 +91,7 @@ function LandingPage({navigation}:any): JSX.Element {
         }}>
         <View style={{width: '90%'}}>
           <Button title="Sign up" color="#009a5a" onPress={() =>
-        navigation.navigate('RecordVideo')
+        navigation.navigate('Login')
       }/>
         </View>
       </View>

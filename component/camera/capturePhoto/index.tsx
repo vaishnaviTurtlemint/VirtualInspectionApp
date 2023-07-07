@@ -16,7 +16,7 @@ import {
 
 
 export default function CameraClick({ navigation }: any): JSX.Element {
-  const camera = useRef(null);
+  const camera = useRef<Camera | null>(null);
   const devices = useCameraDevices();
   const device = devices.back;
   const [imageDate, setimageDate] = useState('');

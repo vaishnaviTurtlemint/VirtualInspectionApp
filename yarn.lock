@@ -5960,6 +5960,11 @@
     "base-64" "^0.1.0"
     "utf8" "^3.0.0"
 
+"react-native-geolocation-service@^5.3.1":
+  "integrity" "sha512-LTXPtPNmrdhx+yeWG47sAaCgQc3nG1z+HLLHlhK/5YfOgfLcAb9HAkhREPjQKPZOUx8pKZMIpdGFUGfJYtimXQ=="
+  "resolved" "http://nexus.turtlemint.com/repository/npm-group/react-native-geolocation-service/-/react-native-geolocation-service-5.3.1.tgz"
+  "version" "5.3.1"
+
 "react-native-paper@^5.9.0":
   "integrity" "sha512-yPiZLESdyyipw8o6RAw5yAijcQye2ALMu2tA5ZqXyhIQ0lQNOYTQRnSrcSD+c/Dj/aCpV4utJrcQveBnK7VlFw=="
   "resolved" "http://nexus.turtlemint.com/repository/npm-group/react-native-paper/-/react-native-paper-5.9.0.tgz"

@@ -24,6 +24,8 @@ import Login from './component/login';
 import LandingPage from './component/landingPage';
 import CameraClick from './component/camera/capturePhoto';
 import RecordVideo from './component/camera/recordVideo';
+import GeolocationTrack from './component/geoLocation';
+import VehicleDetailsForm from './component/Form';
 
 
 
@@ -43,8 +45,10 @@ function App(): JSX.Element {
           component={LandingPage}
         />
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="VehicleDetailsForm" component={VehicleDetailsForm} />
         <Stack.Screen name="CameraClick" component={CameraClick} />
         <Stack.Screen name="RecordVideo" component={RecordVideo} />
+        <Stack.Screen name="GeolocationTrack" component={GeolocationTrack} />
       </Stack.Navigator>
     </NavigationContainer>
 
