@@ -1,0 +1,1 @@
+export const BE_SERVICE_BASE_URL : string = 'http://localhost:9000/'

@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
@@ -15,19 +15,20 @@ import {
   StyleSheet,
   Text,
   useColorScheme,
-  View,
-} from 'react-native';
+  } from 'react-native';
 
 import {
   Colors
 } from 'react-native/Libraries/NewAppScreen';
 import Login from './component/login';
 import LandingPage from './component/landingPage';
+import CameraClick from './component/camera/capturePhoto';
+import RecordVideo from './component/camera/recordVideo';
+
 
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
@@ -42,6 +43,8 @@ function App(): JSX.Element {
           component={LandingPage}
         />
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="CameraClick" component={CameraClick} />
+        <Stack.Screen name="RecordVideo" component={RecordVideo} />
       </Stack.Navigator>
     </NavigationContainer>
 

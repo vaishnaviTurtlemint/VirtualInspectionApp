@@ -8,10 +8,18 @@ import {
   VEHICLE_INSPECTION,
 } from '../../constants/web-text';
 import {TextInput} from 'react-native-paper';
+import {getUser} from "../../services/APICallIntegration"
 
-function Login(): JSX.Element {
+function Login({navigation}:any): JSX.Element {
   const [otpInitiated, setOtpInitiated] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  const callApi = () => {
+    getUser();
+    setOtpInitiated(true)
+    navigation.navigate('CameraClick');
+  }
+
   return (
     <View style={{height: '100%', width: '100%'}}>
       <View
@@ -177,7 +185,7 @@ function Login(): JSX.Element {
                 disabled={phoneNumber.length != 10}
                 title="Submit"
                 color="#009a5a"
-                onPress={() => setOtpInitiated(true)}
+                onPress={() => callApi()}
               />
             </View>
           </View>
