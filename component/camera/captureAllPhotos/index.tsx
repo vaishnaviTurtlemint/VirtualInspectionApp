@@ -142,6 +142,7 @@ export default function CameraAllClick({ route, navigation }): JSX.Element {
       }
 
       setImageData([]);
+      navigation.navigate('SubmissionPage')
     } catch (error) {
       console.error('Error submitting photo for processing:', error);
     }

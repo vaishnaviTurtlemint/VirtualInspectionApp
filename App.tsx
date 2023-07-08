@@ -27,6 +27,7 @@ import RecordVideo from './component/camera/recordVideo';
 import GeolocationTrack from './component/geoLocation';
 import VehicleDetailsForm from './component/Form';
 import CameraAllClick from './component/camera/captureAllPhotos';
+import SubmissionPage from './component/submitPage';
 
 
 
@@ -51,6 +52,7 @@ function App(): JSX.Element {
         <Stack.Screen name="CameraAllClick" component={CameraAllClick}/>
         <Stack.Screen name="RecordVideo" component={RecordVideo} />
         <Stack.Screen name="GeolocationTrack" component={GeolocationTrack} />
+        <Stack.Screen name="SubmissionPage" component={SubmissionPage} />
       </Stack.Navigator>
     </NavigationContainer>
 
