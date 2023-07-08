@@ -14,6 +14,8 @@ import {
   Image,
   PermissionsAndroid
 } from 'react-native';
+import axios from 'axios';
+import { submitFormData } from '../../../services/APICallIntegration';
 
 type CameraClickProps = {
   navigation: any;
@@ -59,7 +61,7 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
       const photo = await camera.current.takePhoto();
       const currentPhotoName = currentPhoto!.replace(/ /g, '_'); // Replace spaces with underscores in the photo name
       const fileName = currentPhotoName + '.jpg'; // Add the file extension
-  
+
       const destPath = '/storage/emulated/0/Download/' + fileName; // Update with your desired custom file path
       await RNFS.moveFile(photo.path, destPath);
       console.log('Photo Path, destination :', photo.path, destPath);
@@ -75,15 +77,15 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
     return (
       <View style={{ flex: 1 }}>
         <Camera ref={camera} style={StyleSheet.absoluteFill} device={device} isActive={true} photo={true}></Camera>
-       {currentPhoto && (
-        <TouchableOpacity
-          style={styles.captureButton}
-          onPress={takePicture}
-          disabled={currentPhoto === null}
-        >
-          <Text style={styles.captureButtonText}>Capture {currentPhoto.charAt(0).toUpperCase() + currentPhoto.slice(1)}</Text>
-        </TouchableOpacity>
-      )}
+        {currentPhoto && (
+          <TouchableOpacity
+            style={styles.captureButton}
+            onPress={takePicture}
+            disabled={currentPhoto === null}
+          >
+            <Text style={styles.captureButtonText}>Capture {currentPhoto.charAt(0).toUpperCase() + currentPhoto.slice(1)}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };
@@ -100,34 +102,61 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
 
   if (!devices.back) return <ActivityIndicator />;
 
+  const submitPhotoForProcess = async () => {
+    try {
+      for (let i = 0; i < imageData.length; i++) {
+        const imageUri = imageData[i];
+        const formData = new FormData();
+        formData.append('image', {
+          uri: imageUri,
+          type: 'image/jpeg',
+          name: 'image.jpg',
+        });
+        // Make a request to the backend API for each photo
+        let response= submitFormData(formData);
+
+        // Handle the response from the backend for each photo
+        console.log('Photo submitted for processing:', response);
+        // Handle any further actions based on the response, such as displaying a success message to the user
+      }
+
+      // Reset imageData state after submitting all photos
+      setImageData([]);
+    } catch (error) {
+      // Handle errors that occurred during the request
+      console.error('Error submitting photo for processing:', error);
+      // Handle any error-specific actions, such as displaying an error message to the user
+    }
+  };
+
   return (
-    <View style={takePhotoClicked ? styles.cameracontainer:styles.container}>
-    {!takePhotoClicked &&<View style={styles.header}>
-    <Image
+    <View style={takePhotoClicked ? styles.cameracontainer : styles.container}>
+      {!takePhotoClicked && <View style={styles.header}>
+        <Image
           style={{
             left: 200,
             width: 150,
-            padding:10,
+            padding: 10,
             resizeMode: 'contain',
             tintColor: '#009a5a',
           }}
           source={require('../../../images/turtlemint.png')}
         />
-      <Text style={styles.headerText}>Please capture photo as per camera angle instruction.  </Text>
-    </View>}
+        <Text style={styles.headerText}>Please capture photo as per camera angle instruction.  </Text>
+      </View>}
 
       {takePhotoClicked ? (
         renderCameraView()
       ) : (
-        renderImageView()
-      )}
+          renderImageView()
+        )}
 
       {showButtons && (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.buttonContainer}>
             {Object.keys(instructionsMap).map((photoKey) => (
               <View key={photoKey} style={styles.buttonWrapper}>
-                 <Text style={styles.instructionsText}>{instructionsMap[photoKey]}</Text>
+                <Text style={styles.instructionsText}>{instructionsMap[photoKey]}</Text>
                 <TouchableOpacity
                   style={[
                     styles.button,
@@ -142,7 +171,7 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
                 >
                   <Text style={styles.buttonText}>{photoKey.charAt(0).toUpperCase() + photoKey.slice(1)}</Text>
                 </TouchableOpacity>
-              
+
               </View>
             ))}
           </View>
@@ -151,15 +180,15 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
 
       {showButtons && (
         <TouchableOpacity
-          style={imageData.length === Object.keys(instructionsMap).length ? styles.submitButton: styles.submitButton1}
+          style={imageData.length === Object.keys(instructionsMap).length ? styles.submitButton : styles.submitButton1}
           onPress={() => {
-           
+            submitPhotoForProcess();
           }}
         >
           <Text style={styles.submitButtonText}>Process Inspection</Text>
         </TouchableOpacity>
       )}
-    
+
     </View>
   );
 }
@@ -173,7 +202,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F4F6F8',
-    marginBottom:50
+    marginBottom: 50
   },
   header: {
     paddingTop: 20,
@@ -259,7 +288,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 20,
   },
-  submitButton1:{
+  submitButton1: {
     width: '70%',
     height: 50,
     backgroundColor: '#808080',
