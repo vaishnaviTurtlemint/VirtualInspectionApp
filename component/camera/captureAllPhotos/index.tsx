@@ -14,11 +14,11 @@ import {
   Image,
   PermissionsAndroid
 } from 'react-native';
-import axios from 'axios';
 import { submitFormData } from '../../../services/APICallIntegration';
 
 type CameraClickProps = {
-  navigation: any;
+  transactionId: string
+
 };
 
 type InstructionsMap = {
@@ -36,7 +36,8 @@ const instructionsMap: InstructionsMap = {
   'rear Right': 'Capture photo from the rear right',
 };
 
-export default function CameraClick({ navigation }: CameraClickProps): JSX.Element {
+export default function CameraAllClick({ route, navigation }): JSX.Element {
+  const { transactionId } = route.params;
   const camera = useRef<Camera | null>(null);
   const devices = useCameraDevices();
   const device = devices.back;
@@ -48,11 +49,19 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
 
   useEffect(() => {
     checkPermission();
+    console.log('====================================');
+    console.log(transactionId);
+    console.log('====================================');
   }, []);
 
   const checkPermission = async () => {
     const cameraPermission = await Camera.requestCameraPermission();
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
+    const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('Storage permission granted');
+    } else {
+      console.log('Storage permission denied');
+    }
     console.log('Camera Permission:', cameraPermission);
   };
 
@@ -61,9 +70,13 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
       const photo = await camera.current.takePhoto();
       const currentPhotoName = currentPhoto!.replace(/ /g, '_'); // Replace spaces with underscores in the photo name
       const fileName = currentPhotoName + '.jpg'; // Add the file extension
-
       const destPath = '/storage/emulated/0/Download/' + fileName; // Update with your desired custom file path
-      await RNFS.moveFile(photo.path, destPath);
+      const fileExists = await RNFS.exists(destPath);
+      if (fileExists) {
+        await RNFS.unlink(destPath);
+        console.log('File deleted successfully');
+      } 
+      await RNFS.copyFile(photo.path, destPath);
       console.log('Photo Path, destination :', photo.path, destPath);
       setImageData((prevImageData) => [...prevImageData, destPath]);
       setShowButtons(true);
@@ -107,25 +120,30 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
       for (let i = 0; i < imageData.length; i++) {
         const imageUri = imageData[i];
         const formData = new FormData();
-        formData.append('image', {
-          uri: imageUri,
-          type: 'image/jpeg',
-          name: 'image.jpg',
-        });
-        // Make a request to the backend API for each photo
-        let response= submitFormData(formData);
+        const lastSlashIndex = imageUri.lastIndexOf('/');
+        const imageName = imageUri.substring(lastSlashIndex + 1);
 
-        // Handle the response from the backend for each photo
-        console.log('Photo submitted for processing:', response);
-        // Handle any further actions based on the response, such as displaying a success message to the user
+        formData.append('image', {
+          uri: 'file://'+ imageUri,
+          type: 'image/jpeg',
+          name: imageName,
+        });
+
+        formData.append('transactionId', transactionId);
+        formData.append('extension', '.jpg');
+        formData.append('context', imageName);
+
+        submitFormData(formData).then((response) => {
+          console.log('==================================== response', response);
+        }).catch((err) => {
+          console.log('====================================err', err);
+        });
+
       }
 
-      // Reset imageData state after submitting all photos
       setImageData([]);
     } catch (error) {
-      // Handle errors that occurred during the request
       console.error('Error submitting photo for processing:', error);
-      // Handle any error-specific actions, such as displaying an error message to the user
     }
   };
 

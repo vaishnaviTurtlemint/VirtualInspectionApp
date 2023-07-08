@@ -1,8 +1,7 @@
 import axios, {AxiosInstance} from 'axios';
-import {BE_SERVICE_BASE_URL} from '../constants/API-constant';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://a66b-49-249-199-134.ngrok-free.app/',
+  baseURL: 'https://9d20-49-249-205-150.ngrok-free.app/',
 });
 
 export async function getUser() {
@@ -23,7 +22,7 @@ export async function getUser() {
 }
 
 export async function submitFormData(formData) {
-  axiosInstance
+  await axiosInstance
     .post('api/image-upload', formData, {
       headers: {
         Accept: 'application/json',
@@ -36,7 +35,26 @@ export async function submitFormData(formData) {
     })
     .catch(function (error) {
       // handle error
-      console.log(error);
-    })
-    
+      console.log("error in form", error);
+    });
+}
+
+export async function PostWithJson(path, requestObject) {
+  return new Promise((resolve, reject) => {
+    axiosInstance
+      .post(path, requestObject, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => {
+        console.log(response);
+        resolve(response);
+      })
+      .catch(error => {
+        console.log(error);
+        reject(error);
+      });
+  });
 }

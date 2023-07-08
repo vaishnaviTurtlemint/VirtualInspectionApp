@@ -48,7 +48,7 @@ function App(): JSX.Element {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="VehicleDetailsForm" component={VehicleDetailsForm} />
         <Stack.Screen name="CameraClick" component={CameraClick} />
-        <Stack.Screen name="CameraAllClick" component={CameraAllClick} />
+        <Stack.Screen name="CameraAllClick" component={CameraAllClick}/>
         <Stack.Screen name="RecordVideo" component={RecordVideo} />
         <Stack.Screen name="GeolocationTrack" component={GeolocationTrack} />
       </Stack.Navigator>

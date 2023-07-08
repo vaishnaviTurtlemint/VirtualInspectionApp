@@ -8,16 +8,37 @@ import {
   VEHICLE_INSPECTION,
 } from '../../constants/web-text';
 import {TextInput} from 'react-native-paper';
-import {getUser} from "../../services/APICallIntegration"
+import {PostWithJson} from "../../services/APICallIntegration"
 
 function Login({navigation}:any): JSX.Element {
   const [otpInitiated, setOtpInitiated] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
 
-  const callApi = () => {
-    getUser();
-    setOtpInitiated(true)
-    navigation.navigate('CameraAllClick');
+
+  const getOTP = async () => {
+    await PostWithJson('login',{'phone_number' : '+91'+phoneNumber}).then( (response)=> {
+      if(response.status == 200){
+        setOtpInitiated(true)
+      }
+    }).catch((error)=>{
+      console.log('====================================',error);
+    });
+  }
+  const handleOtpChange = (index: any, value: any) => {
+    const updatedOtp = otp.split('');
+    updatedOtp[index] = value;
+    setOtp(updatedOtp.join(''));
+  };
+
+  const verifyOTP =async () => {
+    await PostWithJson('verify_otp', {'phone_number' : '+91'+phoneNumber, 'otp': otp}).then( (response)=> {
+      if(response.status == 200){
+        navigation.navigate('VehicleDetailsForm')
+      }
+    }).catch((error)=>{
+      console.log('====================================',error);
+    });
   }
 
   return (
@@ -69,7 +90,7 @@ function Login({navigation}:any): JSX.Element {
                   fontWeight: 'bold',
                   textAlign: 'left',
                 }}
-                placeholder="91+"
+                placeholder="+91"
                 keyboardType="numeric"
                 editable={false}></TextInput>
 
@@ -117,7 +138,7 @@ function Login({navigation}:any): JSX.Element {
                 disabled={phoneNumber.length != 10}
                 title="Submit"
                 color="#009a5a"
-                onPress={() => setOtpInitiated(true)}
+                onPress={() => getOTP()}
               />
             </View>
           </View>
@@ -145,19 +166,38 @@ function Login({navigation}:any): JSX.Element {
               <TextInput
                 style={{backgroundColor: '#D3D3D3'}}
                 keyboardType="numeric"
-                maxLength={1}></TextInput>
+                maxLength={1}
+                value= {otp[0]}
+                onChange={event => {
+                  handleOtpChange(0,  event.nativeEvent.text);
+                }}
+                ></TextInput>
               <TextInput
                 style={{backgroundColor: '#D3D3D3'}}
                 keyboardType="numeric"
-                maxLength={1}></TextInput>
+                maxLength={1}
+                value= {otp[1]}
+                onChange={event => {
+                  handleOtpChange(1,  event.nativeEvent.text);
+                }}></TextInput>
               <TextInput
                 style={{backgroundColor: '#D3D3D3'}}
                 keyboardType="numeric"
-                maxLength={1}></TextInput>
+                maxLength={1}
+                value= {otp[2]}
+                onChange={event => {
+                  handleOtpChange(2,  event.nativeEvent.text);
+                }}
+                ></TextInput>
               <TextInput
                 style={{backgroundColor: '#D3D3D3'}}
                 keyboardType="numeric"
-                maxLength={1}></TextInput>
+                maxLength={1}
+                value= {otp[3]}
+                onChange={event => {
+                  handleOtpChange(3, event.nativeEvent.text);
+                }}
+                ></TextInput>
             </View>
 
             <Text
@@ -185,7 +225,7 @@ function Login({navigation}:any): JSX.Element {
                 disabled={phoneNumber.length != 10}
                 title="Submit"
                 color="#009a5a"
-                onPress={() => callApi()}
+                onPress={() => verifyOTP()}
               />
             </View>
           </View>
