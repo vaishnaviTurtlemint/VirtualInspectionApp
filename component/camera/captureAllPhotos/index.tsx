@@ -66,7 +66,7 @@ export default function CameraAllClick({ route, navigation }): JSX.Element {
   };
 
   const takePicture = async () => {
-    if (camera != null && camera.current != null) {
+    if (camera != null && camera.current != null) {      
       const photo = await camera.current.takePhoto();
       const currentPhotoName = currentPhoto!.replace(/ /g, '_'); // Replace spaces with underscores in the photo name
       const fileName = currentPhotoName + '.jpg'; // Add the file extension
@@ -199,6 +199,7 @@ export default function CameraAllClick({ route, navigation }): JSX.Element {
 
       {showButtons && (
         <TouchableOpacity
+          disabled={ imageData.length === Object.keys(instructionsMap).length ? false: true}
           style={imageData.length === Object.keys(instructionsMap).length ? styles.submitButton : styles.submitButton1}
           onPress={() => {
             submitPhotoForProcess();
