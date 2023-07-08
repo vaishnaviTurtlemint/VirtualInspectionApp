@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import RNFS from 'react-native-fs';
 import {
   SafeAreaView,
   ScrollView,
@@ -10,7 +11,8 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
-  Image
+  Image,
+  PermissionsAndroid
 } from 'react-native';
 
 type CameraClickProps = {
@@ -40,6 +42,7 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
   const [takePhotoClicked, setTakePhotoClicked] = useState<boolean>(false);
   const [currentPhoto, setCurrentPhoto] = useState<string | null>(null);
   const [showButtons, setShowButtons] = useState<boolean>(true);
+  const [buttonStates, setButtonStates] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     checkPermission();
@@ -47,16 +50,24 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
 
   const checkPermission = async () => {
     const cameraPermission = await Camera.requestCameraPermission();
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
     console.log('Camera Permission:', cameraPermission);
   };
 
   const takePicture = async () => {
     if (camera != null && camera.current != null) {
       const photo = await camera.current.takePhoto();
-      console.log('Photo Path:', photo.path);
-      setImageData((prevImageData) => [...prevImageData, photo.path]);
+      const currentPhotoName = currentPhoto!.replace(/ /g, '_'); // Replace spaces with underscores in the photo name
+      const fileName = currentPhotoName + '.jpg'; // Add the file extension
+  
+      const destPath = '/storage/emulated/0/Download/' + fileName; // Update with your desired custom file path
+      await RNFS.moveFile(photo.path, destPath);
+      console.log('Photo Path, destination :', photo.path, destPath);
+      setImageData((prevImageData) => [...prevImageData, destPath]);
       setShowButtons(true);
       setCurrentPhoto(null);
+      setButtonStates((prevButtonStates) => ({ ...prevButtonStates, [currentPhoto!]: true }));
+      setTakePhotoClicked(false);
     }
   };
 
@@ -64,12 +75,15 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
     return (
       <View style={{ flex: 1 }}>
         <Camera ref={camera} style={StyleSheet.absoluteFill} device={device} isActive={true} photo={true}></Camera>
+       {currentPhoto && (
         <TouchableOpacity
-          style={styles.CameraClick}
+          style={styles.captureButton}
           onPress={takePicture}
+          disabled={currentPhoto === null}
         >
-          <Text style={styles.CameraClickButton}>Capture Photo</Text>
+          <Text style={styles.captureButtonText}>Capture {currentPhoto.charAt(0).toUpperCase() + currentPhoto.slice(1)}</Text>
         </TouchableOpacity>
+      )}
       </View>
     );
   };
@@ -87,67 +101,92 @@ export default function CameraClick({ navigation }: CameraClickProps): JSX.Eleme
   if (!devices.back) return <ActivityIndicator />;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Please capture below angle photo and submit</Text>
-      </View>
+    <View style={takePhotoClicked ? styles.cameracontainer:styles.container}>
+    {!takePhotoClicked &&<View style={styles.header}>
+    <Image
+          style={{
+            left: 200,
+            width: 150,
+            padding:10,
+            resizeMode: 'contain',
+            tintColor: '#009a5a',
+          }}
+          source={require('../../../images/turtlemint.png')}
+        />
+      <Text style={styles.headerText}>Please capture photo as per camera angle instruction.  </Text>
+    </View>}
 
       {takePhotoClicked ? (
         renderCameraView()
       ) : (
-          renderImageView()
-        )}
+        renderImageView()
+      )}
 
       {showButtons && (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.buttonContainer}>
             {Object.keys(instructionsMap).map((photoKey) => (
               <View key={photoKey} style={styles.buttonWrapper}>
+                 <Text style={styles.instructionsText}>{instructionsMap[photoKey]}</Text>
                 <TouchableOpacity
-                  style={styles.button}
+                  style={[
+                    styles.button,
+                    buttonStates[photoKey] ? styles.buttonDisabled : null,
+                  ]}
                   onPress={() => {
                     setTakePhotoClicked(true);
                     setShowButtons(false);
                     setCurrentPhoto(photoKey);
                   }}
+                  disabled={buttonStates[photoKey]}
                 >
                   <Text style={styles.buttonText}>{photoKey.charAt(0).toUpperCase() + photoKey.slice(1)}</Text>
                 </TouchableOpacity>
-                <Text style={styles.instructionsText}>{instructionsMap[photoKey]}</Text>
+              
               </View>
             ))}
           </View>
         </ScrollView>
       )}
 
-      {imageData.length === Object.keys(instructionsMap).length && (
+      {showButtons && (
         <TouchableOpacity
-          style={styles.submitButton}
+          style={imageData.length === Object.keys(instructionsMap).length ? styles.submitButton: styles.submitButton1}
           onPress={() => {
-            console.log('Submit All Photos');
+           
           }}
         >
-          <Text style={styles.submitButtonText}>Submit</Text>
+          <Text style={styles.submitButtonText}>Process Inspection</Text>
         </TouchableOpacity>
       )}
+    
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  cameracontainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F4F6F8',
+    marginBottom:50
   },
   header: {
     paddingTop: 20,
     paddingBottom: 10,
+    marginTop: 20
   },
   headerText: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#000000'
+  },
+  buttonDisabled: {
+    backgroundColor: '#009a5a',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -174,7 +213,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 60,
     borderRadius: 10,
-    backgroundColor: '#009a5a',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000000',
@@ -189,20 +228,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   instructionsText: {
-    color: '#777',
-    fontSize: 12,
-    marginTop: 5,
+    color: '#000000',
+    fontSize: 13,
+    marginBottom: 8,
     textAlign: 'center',
   },
   captureButton: {
     width: '50%',
     height: 50,
+    borderRadius: 30,
     backgroundColor: '#009a5a',
-    justifyContent: 'center',
+    position: "absolute",
+    bottom: 50,
+    alignSelf: "center",
     alignItems: 'center',
-    alignSelf: 'center',
-    borderRadius: 10,
-    marginTop: 20,
+    justifyContent: 'center'
   },
   captureButtonText: {
     color: 'white',
@@ -213,6 +253,16 @@ const styles = StyleSheet.create({
     width: '70%',
     height: 50,
     backgroundColor: '#009a5a',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  submitButton1:{
+    width: '70%',
+    height: 50,
+    backgroundColor: '#808080',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
