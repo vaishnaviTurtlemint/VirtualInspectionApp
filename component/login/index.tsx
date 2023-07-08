@@ -17,7 +17,7 @@ function Login({navigation}:any): JSX.Element {
   const callApi = () => {
     getUser();
     setOtpInitiated(true)
-    navigation.navigate('VehicleDetailsForm');
+    navigation.navigate('CameraAllClick');
   }
 
   return (
