@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Button, Image , PermissionsAndroid, Platform,} from 'react-native';
+import { View, Text, TouchableOpacity, Button, Image, PermissionsAndroid, Platform, } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import Geolocation from 'react-native-geolocation-service';
-import { PostWithJson } from '../../services/APICallIntegration';
+import { PostWithJson, getVehicleDetails } from '../../services/APICallIntegration';
 
 interface VehicleDetailsFormProps {
   navigation: any;
 }
 
 interface VehicleInfo {
+  regNo: string;
   engineNo: string;
   chassisNo: string;
 }
@@ -25,17 +26,25 @@ const VehicleDetailsForm: React.FC<VehicleDetailsFormProps> = ({ navigation }) =
   const [vehicleData, setVehicleData] = useState<Map<string, VehicleInfo>>(() => {
     const vehicleDetails: { [key: string]: VehicleInfo } = {
       'MH14KL2508': {
+        regNo: 'MH-14-KL-2508',
         engineNo: 'AF217268062',
         chassisNo: 'MB8DP12DLN8E05540',
       },
       'KA52M5083': {
+        regNo: 'KA-52-M-5083',
         engineNo: 'D4FBFM415389',
         chassisNo: 'MALC381ULFM031859J',
       },
       'UP82U8383': {
+        regNo: 'UP-82-U-8383',
         engineNo: 'GPE4A77064',
         chassisNo: 'MA1PS2GPKE5A46233',
       },
+      'MH01AD1234': {
+        regNo: 'MH-01-AD-1234',
+        engineNo: 'GPE4A77064',
+        chassisNo: 'MA1PS2GPKE5A46233',
+      }
     };
 
     return new Map(Object.entries(vehicleDetails));
@@ -89,6 +98,15 @@ const VehicleDetailsForm: React.FC<VehicleDetailsFormProps> = ({ navigation }) =
   useEffect(() => {
     const fetchEngineAndChassisData = async () => {
       if (registrationNo) {
+        // let data: VehicleInfo | undefined = vehicleData.get(registrationNo.toUpperCase());
+        // let regNo = data!.regNo
+        // await getVehicleDetails(regNo).then((response) => {
+        //   setEngineNo(response.engineNum);
+        //   setChassisNo(response.chassisNum);
+        // }).catch((err) => {
+        //   setErrorMessage('Data not found for the provided registration number...');
+        //   console.log('Data not found for the provided registration number', err);
+        // })
         let data: VehicleInfo | undefined = vehicleData.get(registrationNo.toUpperCase());
         if (data) {
           setErrorMessage('');
@@ -110,7 +128,7 @@ const VehicleDetailsForm: React.FC<VehicleDetailsFormProps> = ({ navigation }) =
   };
 
 
-  const submitVehicleDetails= () => {
+  const submitVehicleDetails = () => {
     let data = {
       engineNumber: engineNo,
       chassisNumber: chassisNo,
@@ -118,18 +136,18 @@ const VehicleDetailsForm: React.FC<VehicleDetailsFormProps> = ({ navigation }) =
       latitude: latitude,
       longitude: longitude
     }
-    PostWithJson('initiate-inspection', data).then( (response)=> {
-      if(response.status == 200){
-        
-        console.log('====================================',response);
-        const transactionId =  response.data.transactionId; // Replace with the actual transactionId
+    PostWithJson('initiate-inspection', data).then((response) => {
+      if (response.status == 200) {
 
-        navigation.navigate('CameraAllClick', {transactionId})
+        console.log('====================================', response);
+        const transactionId = response.data.transactionId; // Replace with the actual transactionId
+
+        navigation.navigate('CameraAllClick', { transactionId })
       }
-    }).catch((error)=>{
-      console.log('====================================',error );
+    }).catch((error) => {
+      console.log('====================================', error);
     });
-  
+
   }
 
   return (
@@ -160,9 +178,9 @@ const VehicleDetailsForm: React.FC<VehicleDetailsFormProps> = ({ navigation }) =
           autoCapitalize="characters"
           onChangeText={(value) => handleInputChange(value, setRegistrationNo)}
         />
-        { errorMessage && errorMessage.length > 0 && <Text style={{ color: '#FF0000', fontSize: 15, fontWeight: 'bold', marginVertical: 20, textAlign: 'center' }}>
-        {errorMessage}</Text> }
-  
+        {errorMessage && errorMessage.length > 0 && <Text style={{ color: '#FF0000', fontSize: 15, fontWeight: 'bold', marginVertical: 20, textAlign: 'center' }}>
+          {errorMessage}</Text>}
+
         {engineNo && chassisNo && (
           <>
             <TextInput
@@ -200,18 +218,18 @@ const VehicleDetailsForm: React.FC<VehicleDetailsFormProps> = ({ navigation }) =
           marginBottom: 20,
           padding: 30
         }}>This app requires access to your location for Inspection.</Text>
-    </View>}
+      </View>}
 
-<View style={{ width: '100%', position: 'absolute', bottom: 20, paddingHorizontal: 20 }}>
-  <Button
-    disabled={!isFormValid}
-    title="Submit"
-    color={isFormValid ? '#009a5a' : '#808080'}
-    onPress={() => {
-      submitVehicleDetails()
-    }}
-  />
-</View>
+      <View style={{ width: '100%', position: 'absolute', bottom: 20, paddingHorizontal: 20 }}>
+        <Button
+          disabled={!isFormValid}
+          title="Submit"
+          color={isFormValid ? '#009a5a' : '#808080'}
+          onPress={() => {
+            submitVehicleDetails()
+          }}
+        />
+      </View>
     </View >
   );
 };

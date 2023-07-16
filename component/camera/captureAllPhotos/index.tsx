@@ -14,7 +14,7 @@ import {
   Image,
   PermissionsAndroid
 } from 'react-native';
-import { submitFormData } from '../../../services/APICallIntegration';
+import { submitFormData, PostWithJson } from '../../../services/APICallIntegration';
 
 type CameraClickProps = {
   transactionId: string
@@ -117,7 +117,7 @@ export default function CameraAllClick({ route, navigation }): JSX.Element {
 
   const submitPhotoForProcess = async () => {
     try {
-      for (let i = 0; i < imageData.length; i++) {
+       for (let i = 0; i < imageData.length; i++) {
         const imageUri = imageData[i];
         const formData = new FormData();
         const lastSlashIndex = imageUri.lastIndexOf('/');
@@ -142,6 +142,11 @@ export default function CameraAllClick({ route, navigation }): JSX.Element {
       }
 
       setImageData([]);
+      PostWithJson('process-inspection', {'transactionId': transactionId}).then((response)=> {
+        console.log('====================================');
+        console.log('process inspection started', response);
+        console.log('====================================');
+      })
       navigation.navigate('SubmissionPage')
     } catch (error) {
       console.error('Error submitting photo for processing:', error);
