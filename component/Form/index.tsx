@@ -216,7 +216,8 @@ const VehicleDetailsForm: React.FC<VehicleDetailsFormProps> = ({ navigation }) =
           fontSize: 18,
           fontWeight: 'bold',
           marginBottom: 20,
-          padding: 30
+          padding: 30,
+          color: '#000000'
         }}>This app requires access to your location for Inspection.</Text>
       </View>}
 
